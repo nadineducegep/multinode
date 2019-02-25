@@ -1,4 +1,9 @@
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.websockets.WebSocket;
@@ -9,18 +14,44 @@ import org.glassfish.grizzly.websockets.WebSocketEngine;
 public class App {
 
 	// https://github.com/javaee/grizzly/blob/master/modules/websockets/src/main/java/org/glassfish/grizzly/websockets/WebSocketApplication.java
-	public class ServeurJeu extends WebSocketApplication{
+	public class ServeurJeu extends WebSocketApplication implements Runnable{
 	
+		private final List<WebSocket> sockets = new ArrayList<WebSocket>();
+		
 		@Override
 	    public void onConnect(WebSocket socket) {
-	    	super.onConnect(socket);
-	    	System.out.println("Connect");
+	    	//super.onConnect(socket);
+			sockets.add(socket);
+			System.out.println("Connect");
 	    }
 		@Override
 		public void onMessage(WebSocket socket, String message) {
 			super.onMessage(socket, message);
 	    	System.out.println("Message " + message);
 			//socket.send(message);
+		}
+		
+		protected boolean actif = false;
+		protected ExecutorService coordonnateur;
+		protected ExecutorService secretaire;
+	    public void start() {
+	        actif = true;
+	        coordonnateur = Executors.newSingleThreadExecutor();
+	        coordonnateur.submit(this);
+	        ExecutorService secretaire = Executors.newFixedThreadPool(10);
+	    }
+		@Override
+		public void run() {
+
+			while(this.actif)
+			{
+                try {
+					Thread.sleep(20);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			
 		}
 		
 	}
@@ -40,8 +71,9 @@ public class App {
 		
 		try {
 			serveurWeb.start();
-			System.in.read();
-			serveurWeb.stop();
+			serveurJeu.start();
+			//System.in.read();
+			//serveurWeb.stop();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
