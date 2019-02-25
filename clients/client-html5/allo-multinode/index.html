@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <title></title>
+    <meta content="">
+    <style></style>
+    
+    
+    <script type="text/javascript">
+    
+    try
+    {
+        var contact = new WebSocket("ws://localhost:8080/multinode");
+        contact.onclose = function(evenement)
+        {
+            console.log("fermeture" + JSON.stringify(evenement));
+        }
+    }
+    catch(erreur)
+    {
+        console.log("erreur" + JSON.stringify(erreur));        
+    }
+    
+    </script>
+    
+  </head>
+  <body></body>
+</html>
